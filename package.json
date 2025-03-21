@@ -1,0 +1,17 @@
+{
+  "name": "a11y-cli",
+  "version": "1.0.0",
+  "description": "**An automated accessibility testing tool that scans web and mobile applications for common accessibility issues, referencing WCAG guidelines. Provides clear, developer-friendly reports to help identify and fix violations.**",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axe-core": "^4.10.3",
+    "commander": "^13.1.0",
+    "puppeteer": "^24.4.0"
+  }
+}
