@@ -3,6 +3,7 @@ const path = require("path");
 const { launchBrowser } = require("../utils/browser");
 const runAxe = require("../utils/axeRunner");
 const { report } = require("process");
+const generateHTMLReport = require("./htmlReportFormatter");
 
 async function runAudit({ url, output, format, headless }) {
   const { browser, page } = await launchBrowser(headless);
@@ -14,7 +15,7 @@ async function runAudit({ url, output, format, headless }) {
 
     let reportContent;
     if (format == "HTML") {
-      reportContent = generateHTMLReport(results);
+      reportContent = generateHTMLReport(results, url);
     } else {
       reportContent = JSON.stringify(results, null, 2);
     }
@@ -26,7 +27,5 @@ async function runAudit({ url, output, format, headless }) {
     await browser.close();
   }
 }
-
-function generateHTMLReport(results) {}
 
 module.exports = runAudit;
