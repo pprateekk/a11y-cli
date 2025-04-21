@@ -9,6 +9,7 @@ webScan
   .option("-o, --output <file>", "Output file path for results", "report.json")
   .option("--format <type>", "Output format: JSON or HTML", "JSON")
   .option("--headless", "Run in headless mode", true)
+  .option("--severity <level>", "Filter by severity: critical, serious")
   .action(async (url, options) => {
     try {
       await runAudit({
@@ -16,6 +17,7 @@ webScan
         output: options.output,
         format: options.format.toUpperCase(),
         headless: options.headless,
+        severity: options.severity?.toLowerCase(),
       });
     } catch (err) {
       console.error("Web scanning failed: ", err.message);

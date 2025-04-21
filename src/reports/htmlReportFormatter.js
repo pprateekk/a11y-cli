@@ -1,4 +1,4 @@
-function generateHTMLReport(results, url) {
+function generateHTMLReport(results, url, severity) {
   const violations = results.violations;
   const totalViolations = violations.length;
 
@@ -7,7 +7,7 @@ function generateHTMLReport(results, url) {
 		<html>
 		  <head>
 			<meta charset="utf-8">
-			<title>Accessibility Report</title>
+			<title>Accessibility Audit Report</title>
 			<style>
 			  body {
 				font-family: Arial, sans-serif;
@@ -109,7 +109,7 @@ function generateHTMLReport(results, url) {
 			</style>
 		  </head>
 		  <body>
-			<h1>Accessibility Report</h1>
+			<h1>Accessibility Audit Report</h1>
 			
 			<div class="summary">
 			  <p style="font-weight: bold">
@@ -119,6 +119,7 @@ function generateHTMLReport(results, url) {
 				  for 
 				  <a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>
 				</p>
+				<p>Filtered by severity: <strong>${severity}</strong></p>
 			  <p>Report generated: ${new Date().toLocaleString()}</p>
 			</div>
 	`;
