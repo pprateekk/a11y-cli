@@ -36,7 +36,7 @@ jobs:
 
       - name: Run accessibility scan (HTML)
         run: |
-          node index.js web-scan https://example.com \
+          node index.js web-scan https://pprateekk.github.io/personal-portfolio/ \
             --format html \
             --output report.html
 
