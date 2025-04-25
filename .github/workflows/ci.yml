@@ -40,17 +40,17 @@ jobs:
           path: report-html.html
 
       - name: Fail CI if violations found
-          run:|
-            node -e "
-              const report = require('./report.json');
-              const criticalIssues = report.violations.filter(v => v.impact === 'critical' || v.impact === 'serious');
-              if (criticalIssues.length > 0) {
-                console.error(`Found ${criticalIssues.length} critical/serious accessibility issues.`);
-                process.exit(1);
-              } else {
-                console.log('No critical/serious accessibility issues found.');
-              }
-            "
+        run: |
+          node -e "
+            const report = require('./report.json');
+            const criticalIssues = report.violations.filter(v => v.impact === 'critical' || v.impact === 'serious');
+            if (criticalIssues.length > 0) {
+              console.error(`Found ${criticalIssues.length} critical/serious accessibility issues.`);
+              process.exit(1);
+            } else {
+              console.log('No critical/serious accessibility issues found.');
+            }
+          "
 
       - name: Echo report summary
         run: |
