@@ -1,0 +1,63 @@
+name: CI - a11y-cli test
+
+on: 
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-cli:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run the accessibility scan with a11y-cli (json)
+        run: node index.js web-scan https://example.com --format json --output report.json
+
+      - name: Upload the report
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-report-json
+          path: report.json
+
+      - name: Run the accessibility scan with a11y-cli (html)
+        run: node index.js web-scan https://example.com --format html --output report-html.html
+
+      - name: Upload the report
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-report-html
+          path: report-html.html
+
+      - name: Fail CI if violations found
+        run: node -e "
+          const report = require("./report.json");
+          const criticalIssues = report.violations.filter( v => v.impact === "critical" || v.impact === "serious");
+          if(criticalIssues.length > 0) {
+            console.error(`Found ${criticalIssues.length} critical/serious accessibility issues.`};
+            process.exit(1);
+          } else {
+            console.log("No critical/serious accessibility issues found.");
+          }"
+
+      - name: Echo report summary
+        run: node -e"
+          const reportGen = require("./report.json");
+          console.log('----------------------------------------');
+          console.log(`Total violations found = ${report.violations.length}`;
+          console.log('----------------------------------------');
+          report.violations.forEach(v => {
+            console.log(`${v.id} - ${v.description}, (${v.impact})`);
+          });
+          console.log('----------------------------------------');
+          "
