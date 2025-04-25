@@ -5,7 +5,14 @@ const runAxe = require("../utils/axeRunner");
 const { report } = require("process");
 const generateHTMLReport = require("./htmlReportFormatter");
 
-async function runAudit({ url, output, format, headless, severity }) {
+async function runAudit({
+  url,
+  output,
+  format,
+  headless,
+  severity,
+  comparisonFilePath,
+}) {
   const { browser, page } = await launchBrowser(headless);
   const validSeverities = ["critical", "serious"];
 
@@ -65,6 +72,21 @@ async function runAudit({ url, output, format, headless, severity }) {
       };
     }
 
+    let comparisonResult = results;
+
+    if (comparisonFilePath) {
+      if (!fs.existsSync(comparisonFilePath)) {
+        throw new Error(`File not found at path: ${comparisonFilePath}`);
+      } else {
+        comparisonResult = await compareViolations(
+          filteredResults.violations,
+          comparisonFilePath
+        );
+        console.log(`Fixed: ${comparisonResult.fixedIssues.length}`);
+        console.log(`New: ${comparisonResult.newIssues.length}`);
+      }
+    }
+
     //generate JSON/HTML report
     let reportContent;
     if (format == "HTML") {
@@ -82,3 +104,67 @@ async function runAudit({ url, output, format, headless, severity }) {
 }
 
 module.exports = runAudit;
+
+//unique strings for each violation-nod epair
+function getViolationKeys(violationsArr) {
+  const allKeys = [];
+  for (const violation of violationsArr) {
+    const ruleId = violation.id;
+
+    for (const node in violation.nodes) {
+      const selector = Array.isArray(node.target)
+        ? node.target.join(",")
+        : "[no-target]";
+      const uniqueKey = `${ruleId}|${selector}`;
+      allKeys.push(uniqueKey);
+    }
+  }
+
+  return allKeys;
+}
+
+async function compareViolations(currViolations, filePath) {
+  let previousViolations = [];
+
+  if (filePath && fs.existsSync(filePath)) {
+    const prevReportContent = fs.readFileSync(filePath, "utf-8");
+    const parsedReport = JSON.parse(prevReportContent);
+    previousViolations = parsedReport.violations || [];
+  }
+
+  //violiations -> "rile-id|.element-selector"
+  const currKeys = getViolationKeys(currViolations);
+  const prevKeys = getViolationKeys(previousViolations);
+
+  //find new issues (the ones present in the current, but not in previous)
+  const newIssues = [];
+  for (const violation of currViolations) {
+    const newNodes = violation.nodes.filter((node) => {
+      const key = `${violation.id}|${
+        Array.isArray(node.target) ? node.target.join(",") : "[no-target]"
+      }`;
+      return !prevKeys.includes(key); //it is the new issue
+    });
+
+    if (newNodes.length > 0) {
+      newIssues.push({ ...violation, nodes: newNodes });
+    }
+  }
+
+  //find fixed issues( the ones that were in previoud but not in the cirrent ones now)
+  const fixedIssues = [];
+  for (const violation of previousViolations) {
+    const resolvedNodes = violation.nodes.filter((node) => {
+      const key = `${violation.id}|${
+        Array.isArray(node.target) ? node.target.join(",") : "[no-target]"
+      }`;
+      return !currKeys.includes(key); //it is no longer an issue
+    });
+
+    if (resolvedNodes.length > 0) {
+      fixedIssues.push({ ...violation, nodes: resolvedNodes });
+    }
+  }
+
+  return { newIssues, fixedIssues };
+}
