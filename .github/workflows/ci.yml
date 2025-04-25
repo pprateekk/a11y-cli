@@ -2,9 +2,9 @@ name: CI - a11y-cli test
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test-cli:
@@ -17,14 +17,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run accessibility scan (JSON)
         run: |
-          node index.js web-scan https://pprateekk.github.io/personal-portfolio/ \
+          node index.js web-scan https://www.example.com/ \
             --format json \
             --output report.json
 
@@ -36,7 +36,7 @@ jobs:
 
       - name: Run accessibility scan (HTML)
         run: |
-          node index.js web-scan https://pprateekk.github.io/personal-portfolio/ \
+          node index.js web-scan https://www.example.com/ \
             --format html \
             --output report.html
 
