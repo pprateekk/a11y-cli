@@ -1,0 +1,75 @@
+name: CI - a11y-cli test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-cli:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run accessibility scan (JSON)
+        run: |
+          node index.js web-scan https://pprateekk.github.io/personal-portfolio/ \
+            --format json \
+            --output report.json
+
+      - name: Upload JSON report
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-report-json
+          path: report.json
+
+      - name: Run accessibility scan (HTML)
+        run: |
+          node index.js web-scan https://pprateekk.github.io/personal-portfolio/ \
+            --format html \
+            --output report.html
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-report-html
+          path: report.html
+
+      - name: Fail CI on critical/serious violations
+        run: |
+          node -e '
+            const report = require("./report.json");
+            const critical = report.violations.filter(v =>
+              v.impact === "critical" || v.impact === "serious"
+            );
+            if (critical.length) {
+              console.error(`${critical.length} critical/serious issues found.`);
+              process.exit(1);
+            } else {
+              console.log("No critical/serious accessibility issues found.");
+            }
+          '
+
+      - name: Echo report summary
+        run: |
+          node -e '
+            const report = require("./report.json");
+            console.log("----------------------------------------");
+            console.log(`Total violations found: ${report.violations.length}`);
+            console.log("----------------------------------------");
+            report.violations.forEach(v => {
+              console.log(`${v.id} — ${v.description} (${v.impact})`);
+            });
+            console.log("----------------------------------------");
+          '
