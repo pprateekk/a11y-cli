@@ -24,7 +24,7 @@ jobs:
 
       - name: Run accessibility scan (JSON)
         run: |
-          node index.js web-scan https://example.com \
+          node index.js web-scan https://pprateekk.github.io/personal-portfolio/ \
             --format json \
             --output report.json
 
