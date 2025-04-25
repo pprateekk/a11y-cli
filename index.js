@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const { program } = require("commander");
 const webScanCommand = require("./src/commands/webScan");
 const initConfig = require("./src/commands/initConfig");
