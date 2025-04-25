@@ -20,6 +20,12 @@ You can generate JSON or HTML reports, filter issues by severity, customize rule
 
 ---
 
+## Sample HTML Report:
+
+<img src="assets/sample-report.png" alt = "Sample Accessibility Audit Report" width = "820" height = "520">
+
+---
+
 ## Installation
 
 Clone this repo:
